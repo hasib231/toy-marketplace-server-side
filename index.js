@@ -9,9 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.seb4mfu.mongodb.net/?retryWrites=true&w=majority`;
-  
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -25,24 +23,34 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-      await client.connect();
-      
-      const toyCollections = client.db("toyCollections").collection("toyData");
+    await client.connect();
 
-      app.post("/addToys", async (req, res) => {
-        const addToys = req.body;
-          console.log(addToys);
-          
-          const result = await toyCollections.insertOne(addToys);
-          res.send(result);
+    const toyCollections = client.db("toyCollections").collection("toyData");
+
+    app.post("/addToys", async (req, res) => {
+      const addToys = req.body;
+      console.log(addToys);
+
+      const result = await toyCollections.insertOne(addToys);
+      res.send(result);
+    });
+
+    app.get("/allToys", async (req, res) => {
+      const cursor = toyCollections.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //   fetch toy by category
+      app.get("/toyByCategory/:category", async (req, res) => {
+        console.log(req.params.category);
+        const toyCategory = await toyCollections
+          .find({
+            category: req.params.category,
+          })
+          .toArray();
+        res.send(toyCategory);
       });
-
-      app.get("/allToys", async (req, res) => {
-        const cursor = toyCollections.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      });
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -56,11 +64,9 @@ async function run() {
 }
 run().catch(console.dir);
 
-
 app.get("/", (req, res) => {
   res.send("server is running");
 });
-
 
 app.listen(port, () => {
   console.log(`server is running on port: ${port}`);
