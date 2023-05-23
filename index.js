@@ -54,7 +54,7 @@ async function run() {
 
     //   fetch by email
       app.get("/myToys", async (req, res) => {
-        // console.log(req.query.email);
+        console.log(req.query.email);
         let query = {};
         if (req.query?.email) {
           query = { sellerEmail: req.query.email };
