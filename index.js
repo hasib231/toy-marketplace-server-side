@@ -52,6 +52,19 @@ async function run() {
         res.send(toyCategory);
       });
 
+    //   fetch by email
+      app.get("/myToys", async (req, res) => {
+        // console.log(req.query.email);
+        let query = {};
+        if (req.query?.email) {
+          query = { sellerEmail: req.query.email };
+          // console.log(query);
+        }
+          const result = await toyCollections.find(query).toArray();
+          console.log(result);
+        res.send(result);
+      });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
